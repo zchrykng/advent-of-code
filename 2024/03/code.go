@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 var pattern *regexp.Regexp = regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
@@ -42,7 +43,7 @@ func main() {
 	if step == "1" {
 		process_1(lines)
 	} else if step == "2" {
-		process_2()
+		process_2(lines)
 	} else {
 		fmt.Println("Must pick a step")
 	}
@@ -81,6 +82,36 @@ func process_1(lines []string) {
 	fmt.Println(sum)
 }
 
-func process_2() {
+//var pattern *regexp.Regexp = regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
 
+var pattern2 *regexp.Regexp = regexp.MustCompile(`(mul\((\d{1,3}),(\d{1,3})\)|do\(\)|don\'t\(\))`)
+
+func process_2(lines []string) {
+	input := strings.Join(lines, "")
+	parsing := true
+	total := 0
+
+	matches := pattern2.FindAllStringSubmatch(input, -1)
+
+	for i, match := range matches {
+		fmt.Printf("%d: %v\n", i, match)
+		if match[1] == "do()" {
+			parsing = true
+		} else if match[1] == "don't()" {
+			parsing = false
+		} else if parsing == true {
+			a, err1 := strconv.Atoi(match[2])
+			b, err2 := strconv.Atoi(match[3])
+			if err1 != nil {
+				panic(err1)
+			}
+			if err2 != nil {
+				panic(err2)
+			}
+
+			total += a * b
+		}
+	}
+
+	fmt.Println(total)
 }
