@@ -5,9 +5,16 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
-	"strings"
 )
+
+var pattern *regexp.Regexp = regexp.MustCompile(`mul\((\d{1,3}),(\d{1,3})\)`)
+
+type Pair struct {
+	A int
+	B int
+}
 
 func main() {
 	step := os.Args[1]
@@ -24,27 +31,16 @@ func main() {
 
 	scanner := bufio.NewScanner(file)
 
-	reports := [][]int{}
+	lines := []string{}
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		items := strings.Split(line, " ")
-
-		report := []int{}
-		for _, item := range items {
-			value, err := strconv.Atoi(item)
-			if err != nil {
-				panic(err)
-			}
-			report = append(report, value)
-		}
-
-		reports = append(reports, report)
+		lines = append(lines, line)
 	}
 
 	if step == "1" {
-		process_1()
+		process_1(lines)
 	} else if step == "2" {
 		process_2()
 	} else {
@@ -52,8 +48,37 @@ func main() {
 	}
 }
 
-func process_1() {
+func process_1(lines []string) {
+	mults := []Pair{}
 
+	for _, line := range lines {
+		matches := pattern.FindAllStringSubmatch(line, -1)
+
+		if matches == nil {
+			return
+		}
+
+		for _, match := range matches {
+			a, err := strconv.Atoi(match[1])
+			if err != nil {
+				panic(err)
+			}
+			b, err := strconv.Atoi(match[2])
+			if err != nil {
+				panic(err)
+			}
+
+			mults = append(mults, Pair{a, b})
+		}
+	}
+
+	sum := 0
+
+	for _, mult := range mults {
+		sum = sum + (mult.A * mult.B)
+	}
+
+	fmt.Println(sum)
 }
 
 func process_2() {
